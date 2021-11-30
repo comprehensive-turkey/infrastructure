@@ -1,0 +1,25 @@
+{{ range $chart := .Values.charts }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $chart }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/comprehensive-turkey/gitops
+    targetRevision: HEAD
+    path: charts/{{ $chart }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ $chart }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+---
+{{ end }}

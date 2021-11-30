@@ -1,0 +1,5 @@
+name: infrastructure
+runtime: nodejs
+main: src/app.ts
+options:
+  refresh: always

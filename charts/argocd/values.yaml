@@ -1,0 +1,9 @@
+argo-cd:
+  configs:
+    secret:
+      createSecret: false
+charts:
+  - cert-manager
+  - external-dns
+  - ingress-nginx
+  - kubernetes-reflector
