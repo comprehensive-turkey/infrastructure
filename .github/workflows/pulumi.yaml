@@ -11,8 +11,6 @@ jobs:
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-      - uses: mdgreenwald/mozilla-sops-action@v1.1.0
-      - run: sops -d --in-place charts/argocd/templates/argocd-secret.yaml
       - run: gcp_sa=$(cat $GOOGLE_APPLICATION_CREDENTIALS | base64) yq e -i '.data."key.json" = strenv(gcp_sa)' charts/argocd/templates/gcp-sa-secret.yaml
       - run: npm install
       - uses: pulumi/actions@v3
