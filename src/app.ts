@@ -48,25 +48,27 @@ const k8sProvider = new k8s.Provider("k8s-provider", {
   kubeconfig,
 });
 
-const chart = "argocd";
+const charts = ["sops", "argocd"];
 
-const ns = new k8s.core.v1.Namespace(
-  `${chart}-ns`,
-  {
-    metadata: { name: chart },
-  },
-  {
-    provider: k8sProvider,
-  }
-);
+charts.forEach((chart) => {
+  const ns = new k8s.core.v1.Namespace(
+    `${chart}-ns`,
+    {
+      metadata: { name: chart },
+    },
+    {
+      provider: k8sProvider,
+    }
+  );
 
-Reflect.construct(k8s.helm.v3.Chart, [
-  chart,
-  {
-    namespace: ns.metadata.name,
-    path: `../charts/${chart}`,
-  },
-  {
-    provider: k8sProvider,
-  },
-]);
+  Reflect.construct(k8s.helm.v3.Chart, [
+    chart,
+    {
+      namespace: ns.metadata.name,
+      path: `../charts/${chart}`,
+    },
+    {
+      provider: k8sProvider,
+    },
+  ]);
+});

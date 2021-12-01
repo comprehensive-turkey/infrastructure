@@ -7,4 +7,3 @@ charts:
   - external-dns
   - ingress-nginx
   - kubernetes-reflector
-  - sops
