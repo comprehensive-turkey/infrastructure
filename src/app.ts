@@ -1,13 +1,77 @@
 import * as gcp from "@pulumi/gcp";
 import * as k8s from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import { config } from "dotenv";
+import * as mongodbatlas from "@pulumi/mongodbatlas";
+
+config();
+
+const {
+  MONGODB_ATLAS_PUBKEY = "XXXXXXXXXXXXXX",
+  MONGODB_ATLAS_PRIVKEY = "YYYYYYYYYYYYYY",
+  MONGODB_ATLAS_ORGID = "ZZZZZZZZZZZZZZ",
+} = process.env;
+
+const projectName = "comprehensive-turkey";
+
+const mongodbatlasProvider = new mongodbatlas.Provider(
+  "mongodbatlas-provider",
+  {
+    publicKey: MONGODB_ATLAS_PUBKEY,
+    privateKey: MONGODB_ATLAS_PRIVKEY,
+  }
+);
+
+const mongodbatlasProject = new mongodbatlas.Project(
+  projectName,
+  { orgId: MONGODB_ATLAS_ORGID },
+  { provider: mongodbatlasProvider }
+);
+
+const mongodbatlasCluster = new mongodbatlas.Cluster(
+  projectName,
+  {
+    projectId: mongodbatlasProject.id,
+    providerName: "TENANT",
+    providerInstanceSizeName: "M0",
+    backingProviderName: "GCP",
+    providerRegionName: "CENTRAL_US",
+  },
+  { provider: mongodbatlasProvider }
+);
+
+const databaseUserName = "admin";
+const adminDatabaseName = "admin";
+
+const mongodbatlasDatabaseUser = new mongodbatlas.DatabaseUser(
+  databaseUserName,
+  {
+    projectId: mongodbatlasProject.id,
+    username: databaseUserName,
+    roles: [{ roleName: "atlasAdmin", databaseName: adminDatabaseName }],
+    authDatabaseName: adminDatabaseName,
+    password: "test",
+  },
+  { provider: mongodbatlasProvider }
+);
+
+const mongodbatlasProjectIpAccessList = new mongodbatlas.ProjectIpAccessList(
+  projectName,
+  {
+    projectId: mongodbatlasProject.id,
+    cidrBlock: "0.0.0.0/0",
+  },
+  {
+    provider: mongodbatlasProvider,
+  }
+);
 
 const gcpProvider = new gcp.Provider("gcp-provider", {
   zone: "us-central1",
 });
 
 const cluster = new gcp.container.Cluster(
-  "comprehensive-turkey",
+  projectName,
   {
     initialNodeCount: 1,
   },

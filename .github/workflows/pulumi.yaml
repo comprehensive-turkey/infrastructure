@@ -20,3 +20,6 @@ jobs:
           upsert: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          MONGODB_ATLAS_PRIVKEY: ${{ secrets.MONGODB_ATLAS_PRIVKEY }}
+          MONGODB_ATLAS_PUBKEY: ${{ secrets.MONGODB_ATLAS_PUBKEY }}
+          MONGODB_ATLAS_ORGID: ${{ secrets.MONGODB_ATLAS_ORGID }}

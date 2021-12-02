@@ -19,6 +19,8 @@
   "dependencies": {
     "@pulumi/gcp": "^5.17.0",
     "@pulumi/kubernetes": "^3.6.3",
-    "@pulumi/pulumi": "^3.11.0"
+    "@pulumi/mongodbatlas": "^3.0.1",
+    "@pulumi/pulumi": "^3.11.0",
+    "dotenv": "^10.0.0"
   }
 }
