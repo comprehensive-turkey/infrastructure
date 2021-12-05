@@ -1,5 +1,5 @@
 import * as gcp from "@pulumi/gcp";
-import * as k8s from "@pulumi/kubernetes";
+import * as kubernetes from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import { config } from "dotenv";
 import * as mongodbatlas from "@pulumi/mongodbatlas";
@@ -13,6 +13,8 @@ const {
 } = process.env;
 
 const projectName = "comprehensive-turkey";
+const clusterName = `${projectName}-cluster`;
+const adminDatabaseName = "admin";
 
 const mongodbatlasProvider = new mongodbatlas.Provider(
   "mongodbatlas-provider",
@@ -29,7 +31,7 @@ const mongodbatlasProject = new mongodbatlas.Project(
 );
 
 const mongodbatlasCluster = new mongodbatlas.Cluster(
-  projectName,
+  clusterName,
   {
     projectId: mongodbatlasProject.id,
     providerName: "TENANT",
@@ -40,38 +42,35 @@ const mongodbatlasCluster = new mongodbatlas.Cluster(
   { provider: mongodbatlasProvider }
 );
 
-const databaseUserName = "admin";
-const adminDatabaseName = "admin";
-
-const mongodbatlasDatabaseUser = new mongodbatlas.DatabaseUser(
-  databaseUserName,
+Reflect.construct(mongodbatlas.DatabaseUser, [
+  `${projectName}-database-user`,
   {
     projectId: mongodbatlasProject.id,
-    username: databaseUserName,
+    username: "root",
     roles: [{ roleName: "atlasAdmin", databaseName: adminDatabaseName }],
     authDatabaseName: adminDatabaseName,
     password: "test",
   },
-  { provider: mongodbatlasProvider }
-);
+  { provider: mongodbatlasProvider },
+]);
 
-const mongodbatlasProjectIpAccessList = new mongodbatlas.ProjectIpAccessList(
-  projectName,
+Reflect.construct(mongodbatlas.ProjectIpAccessList, [
+  `${projectName}-project-ip-access-list`,
   {
     projectId: mongodbatlasProject.id,
     cidrBlock: "0.0.0.0/0",
   },
   {
     provider: mongodbatlasProvider,
-  }
-);
+  },
+]);
 
 const gcpProvider = new gcp.Provider("gcp-provider", {
   zone: "us-central1",
 });
 
 const cluster = new gcp.container.Cluster(
-  projectName,
+  clusterName,
   {
     initialNodeCount: 1,
   },
@@ -108,31 +107,47 @@ users:
         name: gcp`
   );
 
-const k8sProvider = new k8s.Provider("k8s-provider", {
+const kubernetesProvider = new kubernetes.Provider("kubernetes-provider", {
   kubeconfig,
 });
 
 const charts = ["sops", "argocd"];
 
 charts.forEach((chart) => {
-  const ns = new k8s.core.v1.Namespace(
+  // To-do: uncomment this part (https://github.com/pulumi/pulumi-kubernetes/pull/1809)
+  /*
+  Reflect.construct(kubernetes.helm.v3.Release, [
+    chart,
+    {
+      chart,
+      namespace: chart,
+      createNamespace: true,
+    },
+    {
+      provider: kubernetesProvider,
+    },
+  ]);
+  */
+
+  // To-do: remove the next 20 lines in favour of the above code snippet
+  const chartNamespace = new kubernetes.core.v1.Namespace(
     `${chart}-ns`,
     {
       metadata: { name: chart },
     },
     {
-      provider: k8sProvider,
+      provider: kubernetesProvider,
     }
   );
 
-  Reflect.construct(k8s.helm.v3.Chart, [
+  Reflect.construct(kubernetes.helm.v3.Chart, [
     chart,
     {
-      namespace: ns.metadata.name,
+      namespace: chartNamespace.metadata.name,
       path: `../charts/${chart}`,
     },
     {
-      provider: k8sProvider,
+      provider: kubernetesProvider,
     },
   ]);
 });
