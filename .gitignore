@@ -30,4 +30,4 @@ dist/
 .env
 
 # Track chart dependencies
-!charts/**/charts/*.tgz
+!argocd/charts/*.tgz

@@ -1,0 +1,9 @@
+dependencies:
+- name: argo-cd
+  repository: https://argoproj.github.io/argo-helm
+  version: 3.26.3
+- name: sops-secrets-operator
+  repository: https://isindir.github.io/sops-secrets-operator
+  version: 0.9.7
+digest: sha256:1d68db22dab17dc70de94682341d4d50b501bf53be43665e9bd9706d982895f6
+generated: "2021-12-06T00:23:39.544970025Z"

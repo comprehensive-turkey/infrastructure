@@ -11,7 +11,7 @@ jobs:
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-      - run: gcp_sa=$(cat $GOOGLE_APPLICATION_CREDENTIALS | base64) yq e -i '.data."key.json" = strenv(gcp_sa)' charts/sops/templates/gcp-sa-secret.yaml
+      - run: gcp_sa=$(cat $GOOGLE_APPLICATION_CREDENTIALS | base64) yq e -i '.data."key.json" = strenv(gcp_sa)' argocd/templates/gcp-sa-secret.yaml
       - run: npm install
       - uses: pulumi/actions@v3
         with:

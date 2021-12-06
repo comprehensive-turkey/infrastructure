@@ -111,43 +111,41 @@ const kubernetesProvider = new kubernetes.Provider("kubernetes-provider", {
   kubeconfig,
 });
 
-const charts = ["sops", "argocd"];
+const chart = "argocd";
 
-charts.forEach((chart) => {
-  // To-do: uncomment this part (https://github.com/pulumi/pulumi-kubernetes/pull/1809)
-  /*
-  Reflect.construct(kubernetes.helm.v3.Release, [
+// To-do: uncomment this part (https://github.com/pulumi/pulumi-kubernetes/pull/1809)
+/*
+Reflect.construct(kubernetes.helm.v3.Release, [
+  chart,
+  {
     chart,
-    {
-      chart,
-      namespace: chart,
-      createNamespace: true,
-    },
-    {
-      provider: kubernetesProvider,
-    },
-  ]);
-  */
+    namespace: chart,
+    createNamespace: true,
+  },
+  {
+    provider: kubernetesProvider,
+  },
+]);
+*/
 
-  // To-do: remove the next 20 lines in favour of the above code snippet
-  const chartNamespace = new kubernetes.core.v1.Namespace(
-    `${chart}-ns`,
-    {
-      metadata: { name: chart },
-    },
-    {
-      provider: kubernetesProvider,
-    }
-  );
+// To-do: remove the next 20 lines in favour of the above code snippet
+const chartNamespace = new kubernetes.core.v1.Namespace(
+  `${chart}-ns`,
+  {
+    metadata: { name: chart },
+  },
+  {
+    provider: kubernetesProvider,
+  }
+);
 
-  Reflect.construct(kubernetes.helm.v3.Chart, [
-    chart,
-    {
-      namespace: chartNamespace.metadata.name,
-      path: `../charts/${chart}`,
-    },
-    {
-      provider: kubernetesProvider,
-    },
-  ]);
-});
+Reflect.construct(kubernetes.helm.v3.Chart, [
+  chart,
+  {
+    namespace: chartNamespace.metadata.name,
+    path: `../${chart}`,
+  },
+  {
+    provider: kubernetesProvider,
+  },
+]);

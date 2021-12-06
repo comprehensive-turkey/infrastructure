@@ -1,4 +1,0 @@
-sops-secrets-operator:
-  gcp:
-    enabled: true
-    existingSecretName: gcp-sa
