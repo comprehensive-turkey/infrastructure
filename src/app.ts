@@ -1,10 +1,7 @@
 import * as gcp from "@pulumi/gcp";
 import * as kubernetes from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
-import { config } from "dotenv";
 import * as mongodbatlas from "@pulumi/mongodbatlas";
-
-config();
 
 const {
   MONGODB_ATLAS_PUBKEY = "XXXXXXXXXXXXXX",

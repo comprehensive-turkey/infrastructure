@@ -26,8 +26,5 @@ node_modules/
 # Don't track transpiled files
 dist/
 
-# Env
-.env
-
 # Track chart dependencies
 !argocd/charts/*.tgz
