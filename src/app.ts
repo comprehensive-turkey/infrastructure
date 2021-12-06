@@ -10,11 +10,13 @@ const {
   MONGODB_ATLAS_PUBKEY = "XXXXXXXXXXXXXX",
   MONGODB_ATLAS_PRIVKEY = "YYYYYYYYYYYYYY",
   MONGODB_ATLAS_ORGID = "ZZZZZZZZZZZZZZ",
+  MONGODB_USERPASS = "WWWWWWWWWWWWWW",
 } = process.env;
 
 const projectName = "comprehensive-turkey";
 const clusterName = `${projectName}-cluster`;
 const adminDatabaseName = "admin";
+const dbUsername = "root";
 
 const mongodbatlasProvider = new mongodbatlas.Provider(
   "mongodbatlas-provider",
@@ -42,14 +44,18 @@ const mongodbatlasCluster = new mongodbatlas.Cluster(
   { provider: mongodbatlasProvider }
 );
 
+// const MONGODB_USERPASS = (
+//   Date.now() + (Math.random() < 0.5 ? Math.random() : -Math.random())
+// ).toString(36);
+
 Reflect.construct(mongodbatlas.DatabaseUser, [
   `${projectName}-database-user`,
   {
     projectId: mongodbatlasProject.id,
-    username: "root",
+    username: dbUsername,
     roles: [{ roleName: "atlasAdmin", databaseName: adminDatabaseName }],
     authDatabaseName: adminDatabaseName,
-    password: "test",
+    password: MONGODB_USERPASS,
   },
   { provider: mongodbatlasProvider },
 ]);
@@ -113,6 +119,19 @@ const kubernetesProvider = new kubernetes.Provider("kubernetes-provider", {
 
 const chart = "argocd";
 
+const chartValues = mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
+  secrets: {
+    "db-credentials": {
+      data: {
+        mongo_uri: Buffer.from(mongoUri).toString("base64"),
+        mongo_username: Buffer.from(dbUsername).toString("base64"),
+        mongo_userpass: Buffer.from(MONGODB_USERPASS).toString("base64"),
+      },
+      namespace: "url-shortner-microservices",
+    },
+  },
+}));
+
 // To-do: uncomment this part (https://github.com/pulumi/pulumi-kubernetes/pull/1809)
 /*
 Reflect.construct(kubernetes.helm.v3.Release, [
@@ -121,6 +140,7 @@ Reflect.construct(kubernetes.helm.v3.Release, [
     chart,
     namespace: chart,
     createNamespace: true,
+    values: chartValues,
   },
   {
     provider: kubernetesProvider,
@@ -128,7 +148,7 @@ Reflect.construct(kubernetes.helm.v3.Release, [
 ]);
 */
 
-// To-do: remove the next 20 lines in favour of the above code snippet
+// To-do: remove the next 2 code snpiiets in favour of the above one
 const chartNamespace = new kubernetes.core.v1.Namespace(
   `${chart}-ns`,
   {
@@ -144,6 +164,7 @@ Reflect.construct(kubernetes.helm.v3.Chart, [
   {
     namespace: chartNamespace.metadata.name,
     path: `../${chart}`,
+    values: chartValues,
   },
   {
     provider: kubernetesProvider,

@@ -23,3 +23,4 @@ jobs:
           MONGODB_ATLAS_PRIVKEY: ${{ secrets.MONGODB_ATLAS_PRIVKEY }}
           MONGODB_ATLAS_PUBKEY: ${{ secrets.MONGODB_ATLAS_PUBKEY }}
           MONGODB_ATLAS_ORGID: ${{ secrets.MONGODB_ATLAS_ORGID }}
+          MONGODB_USERPASS: ${{ secrets.MONGODB_USERPASS }}
