@@ -1,25 +1,23 @@
-{{ range $chart := .Values.charts }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ $chart }}
+  name: argocd-apps
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/comprehensive-turkey/gitops
+    repoURL: {{ .Values.gitopsRepoUrl }}
     targetRevision: HEAD
-    path: charts/{{ $chart }}
+    path: charts/argocd-apps
+    helm:
+      parameters:
+        - name: repoUrl
+          value: {{ .Values.gitopsRepoUrl }}
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ $chart }}
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
       allowEmpty: true
-    syncOptions:
-      - CreateNamespace=true
----
-{{ end }}

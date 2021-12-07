@@ -2,11 +2,6 @@ argo-cd:
   configs:
     secret:
       createSecret: false
-charts:
-  - cert-manager
-  - external-dns
-  - ingress-nginx
-  - kubernetes-reflector
 sops-secrets-operator:
   gcp:
     enabled: true
@@ -17,3 +12,4 @@ secrets:
       - external-dns
     data:
       key.json: PFJFREFDVEVEPgo=
+gitopsRepoUrl: https://github.com/comprehensive-turkey/gitops
