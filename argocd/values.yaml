@@ -11,11 +11,9 @@ sops-secrets-operator:
   gcp:
     enabled: true
     existingSecretName: gcp-sa
-
-# secrets:
-#   example-secret:
-#     namespace: example-ns
-#     data:
-#       key: PHZhbHVlPgo=
-
-secrets: {}
+secrets:
+  gcp-sa:
+    otherNamespaces:
+      - external-dns
+    data:
+      key.json: PFJFREFDVEVEPgo=

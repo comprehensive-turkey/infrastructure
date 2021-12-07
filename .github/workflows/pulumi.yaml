@@ -11,7 +11,7 @@ jobs:
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-      - run: gcp_sa=$(cat $GOOGLE_APPLICATION_CREDENTIALS | base64) yq e -i '.data."key.json" = strenv(gcp_sa)' argocd/templates/gcp-sa-secret.yaml
+      - run: gcp_sa=$(cat $GOOGLE_APPLICATION_CREDENTIALS | base64) yq e -i '.secrets.gcp-sa.data."key.json" = strenv(gcp_sa)' argocd/values.yaml
       - run: npm install
       - uses: pulumi/actions@v3
         with:
@@ -20,7 +20,7 @@ jobs:
           upsert: true
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          MONGODB_ATLAS_PRIVKEY: ${{ secrets.MONGODB_ATLAS_PRIVKEY }}
-          MONGODB_ATLAS_PUBKEY: ${{ secrets.MONGODB_ATLAS_PUBKEY }}
+          MONGODB_ATLAS_PRIVATE_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_KEY }}
+          MONGODB_ATLAS_PUBLIC_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_KEY }}
           MONGODB_ATLAS_ORGID: ${{ secrets.MONGODB_ATLAS_ORGID }}
           MONGODB_USERPASS: ${{ secrets.MONGODB_USERPASS }}

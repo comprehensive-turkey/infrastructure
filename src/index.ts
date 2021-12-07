@@ -1,11 +1,9 @@
 import * as gcp from "@pulumi/gcp";
-import * as kubernetes from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import * as kubernetes from "@pulumi/kubernetes";
 import * as mongodbatlas from "@pulumi/mongodbatlas";
 
 const {
-  MONGODB_ATLAS_PUBKEY = "XXXXXXXXXXXXXX",
-  MONGODB_ATLAS_PRIVKEY = "YYYYYYYYYYYYYY",
   MONGODB_ATLAS_ORGID = "ZZZZZZZZZZZZZZ",
   MONGODB_USERPASS = "WWWWWWWWWWWWWW",
 } = process.env;
@@ -15,35 +13,17 @@ const clusterName = `${projectName}-cluster`;
 const adminDatabaseName = "admin";
 const dbUsername = "root";
 
-const mongodbatlasProvider = new mongodbatlas.Provider(
-  "mongodbatlas-provider",
-  {
-    publicKey: MONGODB_ATLAS_PUBKEY,
-    privateKey: MONGODB_ATLAS_PRIVKEY,
-  }
-);
+const mongodbatlasProject = new mongodbatlas.Project(projectName, {
+  orgId: MONGODB_ATLAS_ORGID,
+});
 
-const mongodbatlasProject = new mongodbatlas.Project(
-  projectName,
-  { orgId: MONGODB_ATLAS_ORGID },
-  { provider: mongodbatlasProvider }
-);
-
-const mongodbatlasCluster = new mongodbatlas.Cluster(
-  clusterName,
-  {
-    projectId: mongodbatlasProject.id,
-    providerName: "TENANT",
-    providerInstanceSizeName: "M0",
-    backingProviderName: "GCP",
-    providerRegionName: "CENTRAL_US",
-  },
-  { provider: mongodbatlasProvider }
-);
-
-// const MONGODB_USERPASS = (
-//   Date.now() + (Math.random() < 0.5 ? Math.random() : -Math.random())
-// ).toString(36);
+const mongodbatlasCluster = new mongodbatlas.Cluster(clusterName, {
+  projectId: mongodbatlasProject.id,
+  providerName: "TENANT",
+  providerInstanceSizeName: "M0",
+  backingProviderName: "GCP",
+  providerRegionName: "CENTRAL_US",
+});
 
 Reflect.construct(mongodbatlas.DatabaseUser, [
   `${projectName}-database-user`,
@@ -54,7 +34,6 @@ Reflect.construct(mongodbatlas.DatabaseUser, [
     authDatabaseName: adminDatabaseName,
     password: MONGODB_USERPASS,
   },
-  { provider: mongodbatlasProvider },
 ]);
 
 Reflect.construct(mongodbatlas.ProjectIpAccessList, [
@@ -63,24 +42,12 @@ Reflect.construct(mongodbatlas.ProjectIpAccessList, [
     projectId: mongodbatlasProject.id,
     cidrBlock: "0.0.0.0/0",
   },
-  {
-    provider: mongodbatlasProvider,
-  },
 ]);
 
-const gcpProvider = new gcp.Provider("gcp-provider", {
-  zone: "us-central1",
+const cluster = new gcp.container.Cluster(clusterName, {
+  initialNodeCount: 1,
+  location: "us-central1-c",
 });
-
-const cluster = new gcp.container.Cluster(
-  clusterName,
-  {
-    initialNodeCount: 1,
-  },
-  {
-    provider: gcpProvider,
-  }
-);
 
 const kubeconfig = pulumi
   .all([cluster.endpoint, cluster.masterAuth.clusterCaCertificate])
@@ -116,7 +83,7 @@ const kubernetesProvider = new kubernetes.Provider("kubernetes-provider", {
 
 const chart = "argocd";
 
-const chartValues = mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
+/* const chartValues = */ mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
   secrets: {
     "db-credentials": {
       data: {
@@ -129,25 +96,8 @@ const chartValues = mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
   },
 }));
 
-// To-do: uncomment this part (https://github.com/pulumi/pulumi-kubernetes/pull/1809)
-/*
-Reflect.construct(kubernetes.helm.v3.Release, [
-  chart,
-  {
-    chart,
-    namespace: chart,
-    createNamespace: true,
-    values: chartValues,
-  },
-  {
-    provider: kubernetesProvider,
-  },
-]);
-*/
-
-// To-do: remove the next 2 code snpiiets in favour of the above one
 const chartNamespace = new kubernetes.core.v1.Namespace(
-  `${chart}-ns`,
+  chart,
   {
     metadata: { name: chart },
   },
@@ -161,7 +111,7 @@ Reflect.construct(kubernetes.helm.v3.Chart, [
   {
     namespace: chartNamespace.metadata.name,
     path: `../${chart}`,
-    values: chartValues,
+    /* values: chartValues, */
   },
   {
     provider: kubernetesProvider,
