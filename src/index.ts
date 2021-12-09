@@ -83,7 +83,7 @@ const kubernetesProvider = new kubernetes.Provider("kubernetes-provider", {
 
 const chart = "argocd";
 
-/* const chartValues = */ mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
+const chartValues = mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
   secrets: {
     "db-credentials": {
       data: {
@@ -111,7 +111,7 @@ Reflect.construct(kubernetes.helm.v3.Chart, [
   {
     namespace: chartNamespace.metadata.name,
     path: `../${chart}`,
-    /* values: chartValues, */
+    values: chartValues,
   },
   {
     provider: kubernetesProvider,
