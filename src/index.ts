@@ -91,7 +91,7 @@ const chart = "argocd";
         mongo_username: Buffer.from(dbUsername).toString("base64"),
         mongo_userpass: Buffer.from(MONGODB_USERPASS).toString("base64"),
       },
-      namespace: "url-shortner-microservices",
+      namespace: "url-shortener-microservices",
     },
   },
 }));
