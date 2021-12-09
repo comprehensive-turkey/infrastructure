@@ -27,4 +27,4 @@ node_modules/
 dist/
 
 # Track chart dependencies
-!argocd/charts/*.tgz
+!**/charts/*.tgz
