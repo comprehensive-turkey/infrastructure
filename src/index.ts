@@ -87,9 +87,9 @@ const chartValues = mongodbatlasCluster.mongoUri.apply((mongoUri) => ({
   secrets: {
     "db-credentials": {
       data: {
-        mongo_uri: Buffer.from(mongoUri).toString("base64"),
-        mongo_username: Buffer.from(dbUsername).toString("base64"),
-        mongo_userpass: Buffer.from(MONGODB_USERPASS).toString("base64"),
+        MONGO_URI: Buffer.from(mongoUri).toString("base64"),
+        MONGO_USERNAME: Buffer.from(dbUsername).toString("base64"),
+        MONGO_USERPASS: Buffer.from(MONGODB_USERPASS).toString("base64"),
       },
       namespace: "url-shortener-microservices",
     },
